@@ -1,0 +1,157 @@
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
+import { getImagesByQuery } from './js/pixabay-api';
+import {
+  createGallery,
+  clearGallery,
+  showLoader,
+  hideLoader,
+  showLoadMoreButton,
+  hideLoadMoreButton,
+} from './js/render-functions';
+
+let query;
+let page;
+let totalPages;
+
+const form = document.querySelector('.form');
+const load = document.querySelector('.load');
+const list = document.querySelector('.gallery');
+
+load.addEventListener('click', onLoadMore);
+form.addEventListener('submit', onFormSubmit);
+
+async function onFormSubmit(e) {
+  e.preventDefault();
+  hideLoadMoreButton();
+  showLoader();
+  clearGallery();
+  page = 1;
+  const formData = new FormData(e.target);
+  query = formData.get('search-text').trim();
+  if (query == '') {
+    hideLoader();
+    return;
+  }
+  try {
+    const obj = await getImagesByQuery(query, page);
+    // console.log(obj);
+    totalPages = Math.ceil(obj.totalHits / 15);
+
+    if (totalPages === 0) {
+      //   console.log('yes');
+      hideLoader();
+      //   clearGallery();
+      iziToast.show({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+      });
+    }
+
+    // console.log(obj);
+    const markup = createGallery(obj.hits);
+    list.innerHTML = markup;
+  } catch {
+    iziToast.error({
+      title: 'Error',
+      message: err.message,
+    });
+  }
+  hideLoader();
+  if (page >= totalPages) {
+    hideLoadMoreButton();
+    iziToast.show({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+    });
+  } else {
+    showLoadMoreButton();
+  }
+  return;
+}
+
+async function onLoadMore() {
+  hideLoadMoreButton();
+  showLoader();
+  page += 1;
+  try {
+    const obj = await getImagesByQuery(query, page);
+    // console.log(obj);
+    const markup = createGallery(obj.hits);
+    list.insertAdjacentHTML('beforeend', markup);
+  } catch {
+    console.log('whyyy');
+
+    iziToast.error({
+      title: 'Error',
+    });
+  }
+  hideLoader();
+  //   console.log(page);
+  //   console.log(totalPages);
+
+  if (page >= totalPages) {
+    hideLoadMoreButton();
+    iziToast.show({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+    });
+  } else {
+    showLoadMoreButton();
+  }
+}
+
+// .then(res => {
+//     const arr = res.hits;
+//     // console.log(arr);
+//   if (arr.length == 0) {
+//     console.log('yes');
+//     hideLoader();
+//     //   clearGallery();
+//     return iziToast.show({
+//       message:
+//         'Sorry, there are no images matching your search query. Please try again!',
+//       position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+//     });
+// }
+// hideLoader();
+// return createGallery(arr);
+// })
+// .catch(res => {
+//   hideLoader();
+//   return iziToast.show({
+//     message: 'There was an error!',
+//     position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+//   });
+// });
+//   console.log(arr);
+
+// const gallery1 = document.querySelector('.gallery');
+
+// document.addEventListener('DOMContentLoaded', () => {
+//   getImagesByQuery('cat').then(res => {
+//     const arr = res.hits;
+//     // console.log(arr);
+
+//     const markup = imagesTemplate(arr);
+
+//     gallery1.innerHTML = markup;
+//   });
+// });
+
+// function imageTemplate(image) {
+//   return `<li class="gallery-item">
+// 	<a class="gallery-link" href="${image.largeImageURL}">
+// 		<img
+// 		  class="gallery-image"
+// 		  src="${image.previewURL}"
+// 		  alt=""
+// 		/>
+// 	</a>
+// </li>`;
+// }
+
+// function imagesTemplate(arr) {
+//   return arr.map(imageTemplate).join('');
+// }
