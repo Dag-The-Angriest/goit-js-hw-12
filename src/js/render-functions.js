@@ -21,10 +21,16 @@ let gallery = new SimpleLightbox('.gallery a', {
 // document.addEventListener('DOMContentLoaded', () => {});
 
 export function createGallery(images) {
-  return images.map(createGalleryItem).join('');
+  const markup = images.map(createGalleryItem).join('');
+  gallery.refresh();
+  return (gallery1.innerHTML = markup);
+}
+export function loadMoreGallery(images) {
+  const markup = images.map(createGalleryItem).join('');
+  gallery.refresh();
+  return gallery1.insertAdjacentHTML('beforeend', markup);
 }
 export function createGalleryItem(image) {
-  //   gallery1.refresh();
   const markup = `<li class="gallery-item">
           <a class="gallery-link" href="${image.largeImageURL}">
               <img

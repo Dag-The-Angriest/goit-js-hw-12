@@ -8,6 +8,7 @@ import {
   hideLoader,
   showLoadMoreButton,
   hideLoadMoreButton,
+  loadMoreGallery,
 } from './js/render-functions';
 
 let query;
@@ -52,9 +53,10 @@ async function onFormSubmit(e) {
     }
 
     // console.log(obj);
-    const markup = createGallery(obj.hits);
-    list.innerHTML = markup;
-  } catch {
+    createGallery(obj.hits);
+    // const markup = createGallery(obj.hits);
+    // list.innerHTML = markup;
+  } catch (err) {
     iziToast.error({
       title: 'Error',
       message: err.message,
@@ -63,10 +65,10 @@ async function onFormSubmit(e) {
   hideLoader();
   if (page >= totalPages) {
     hideLoadMoreButton();
-    iziToast.show({
-      message: "We're sorry, but you've reached the end of search results.",
-      position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
-    });
+    // iziToast.show({
+    //   message: "We're sorry, but you've reached the end of search results.",
+    //   position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+    // });
   } else {
     showLoadMoreButton();
   }
@@ -82,8 +84,9 @@ async function onLoadMore() {
   try {
     const obj = await getImagesByQuery(query, page);
     // console.log(obj);
-    const markup = createGallery(obj.hits);
-    list.insertAdjacentHTML('beforeend', markup);
+    loadMoreGallery(obj.hits);
+    // const markup = createGallery(obj.hits);
+    // list.insertAdjacentHTML('beforeend', markup);
   } catch {
     console.log('whyyy');
 
@@ -93,6 +96,7 @@ async function onLoadMore() {
   }
   hideLoader();
   checkObserverStatus();
+  scrollPage();
   //   console.log(page);
   //   console.log(totalPages);
 
@@ -116,14 +120,25 @@ const autoLoad = new IntersectionObserver(entries => {
 });
 
 function checkObserverStatus() {
-  console.log('Перевірка чи треба вирубати onLoadMore');
+  //   console.log('Перевірка чи треба вирубати onLoadMore');
   if (page >= totalPages) {
     autoLoad.unobserve(target);
-    console.log('Вирубили onLoadMore');
+    // console.log('Вирубили onLoadMore');
   } else {
-    console.log('Підняли onLoadMore');
+    // console.log('Підняли onLoadMore');
     autoLoad.observe(target);
   }
+}
+
+function scrollPage() {
+  const elem = list.firstElementChild;
+  //   console.log(elem);
+  const height = elem.getBoundingClientRect().height;
+  //   console.log(height);
+  window.scrollBy({
+    top: height * 2,
+    behavior: 'smooth',
+  });
 }
 
 // .then(res => {
