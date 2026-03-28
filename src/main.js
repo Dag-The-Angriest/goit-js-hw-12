@@ -17,6 +17,7 @@ let totalPages;
 const form = document.querySelector('.form');
 const load = document.querySelector('.load');
 const list = document.querySelector('.gallery');
+const target = document.querySelector('.js-target');
 
 load.addEventListener('click', onLoadMore);
 form.addEventListener('submit', onFormSubmit);
@@ -33,6 +34,7 @@ async function onFormSubmit(e) {
     hideLoader();
     return;
   }
+  autoLoad.unobserve(target);
   try {
     const obj = await getImagesByQuery(query, page);
     // console.log(obj);
@@ -68,13 +70,15 @@ async function onFormSubmit(e) {
   } else {
     showLoadMoreButton();
   }
-  return;
+  checkObserverStatus();
+  //   return;
 }
 
 async function onLoadMore() {
   hideLoadMoreButton();
   showLoader();
   page += 1;
+  autoLoad.unobserve(target);
   try {
     const obj = await getImagesByQuery(query, page);
     // console.log(obj);
@@ -88,6 +92,7 @@ async function onLoadMore() {
     });
   }
   hideLoader();
+  checkObserverStatus();
   //   console.log(page);
   //   console.log(totalPages);
 
@@ -99,6 +104,25 @@ async function onLoadMore() {
     });
   } else {
     showLoadMoreButton();
+  }
+}
+
+const autoLoad = new IntersectionObserver(entries => {
+  const entry = entries[0];
+  if (entry.isIntersecting) {
+    console.log('Викликаю onLoadMore');
+    onLoadMore();
+  }
+});
+
+function checkObserverStatus() {
+  console.log('Перевірка чи треба вирубати onLoadMore');
+  if (page >= totalPages) {
+    autoLoad.unobserve(target);
+    console.log('Вирубили onLoadMore');
+  } else {
+    console.log('Підняли onLoadMore');
+    autoLoad.observe(target);
   }
 }
 
