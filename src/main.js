@@ -65,10 +65,11 @@ async function onFormSubmit(e) {
   hideLoader();
   if (page >= totalPages) {
     hideLoadMoreButton();
-    // iziToast.show({
-    //   message: "We're sorry, but you've reached the end of search results.",
-    //   position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
-    // });
+
+    iziToast.show({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+    });
   } else {
     showLoadMoreButton();
   }

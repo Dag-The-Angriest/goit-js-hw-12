@@ -22,13 +22,15 @@ let gallery = new SimpleLightbox('.gallery a', {
 
 export function createGallery(images) {
   const markup = images.map(createGalleryItem).join('');
+  gallery1.innerHTML = markup;
   gallery.refresh();
-  return (gallery1.innerHTML = markup);
+  return;
 }
 export function loadMoreGallery(images) {
   const markup = images.map(createGalleryItem).join('');
+  gallery1.insertAdjacentHTML('beforeend', markup);
   gallery.refresh();
-  return gallery1.insertAdjacentHTML('beforeend', markup);
+  return;
 }
 export function createGalleryItem(image) {
   const markup = `<li class="gallery-item">
